@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,7 +9,10 @@ import (
 
 func main() {
 	host := "0.0.0.0"
-	port := 8080
+	var port int
+
+	flag.IntVar(&port, "port", 8080, "Port to listen on")
+	flag.Parse()
 
 	mux := http.NewServeMux()
 

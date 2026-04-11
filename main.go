@@ -3,9 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 )
+
+type application struct {
+	logger *slog.Logger
+}
 
 func main() {
 	host := "0.0.0.0"
@@ -14,15 +19,22 @@ func main() {
 	flag.IntVar(&port, "port", 8080, "Port to listen on")
 	flag.Parse()
 
+	app := &application{
+		logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
+	}
+
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
-	mux.HandleFunc("GET /{$}", handleHome)
-	mux.HandleFunc("GET /paste/{id}", handlePasteView)
-	mux.HandleFunc("POST /paste", handlePasteCreate)
-	mux.HandleFunc("GET /help", handleHelp)
+	mux.HandleFunc("GET /{$}", app.handleHome)
+	mux.HandleFunc("GET /paste/{id}", app.handlePasteView)
+	mux.HandleFunc("POST /paste", app.handlePasteCreate)
+	mux.HandleFunc("GET /help", app.handleHelp)
 
-	log.Printf("Server running on port %d...\n", port)
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), mux)
-	log.Fatal(err)
+	app.logger.Info("Starting server", "host", host, "port", port)
+	err := http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), mux) // err is always non-nil
+	if err != nil {
+		app.logger.Error(err.Error())
+		os.Exit(1)
+	}
 }

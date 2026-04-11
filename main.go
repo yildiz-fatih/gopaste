@@ -11,6 +11,8 @@ func main() {
 	port := 8080
 
 	mux := http.NewServeMux()
+
+	mux.Handle("GET /static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
 	mux.HandleFunc("GET /{$}", handleHome)
 	mux.HandleFunc("GET /paste/{id}", handlePasteView)
 	mux.HandleFunc("POST /paste", handlePasteCreate)

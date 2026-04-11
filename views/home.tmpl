@@ -1,0 +1,32 @@
+{{ define "title" }}Home{{ end }}
+
+{{ define "main" }}
+<form action="/paste" method="POST" style="height: 100%;">
+
+    <textarea name="content" placeholder="Type or paste something..." autofocus></textarea>
+
+    <div id="top" class="controls">
+        <button type="submit" title="Share">
+            Share
+        </button>
+
+        <button type="button" onclick="window.location.href='/'" title="New">
+            New
+        </button>
+
+        <button type="button" onclick="window.location.href='/help'" title="Help">
+            Help
+        </button>
+    </div>
+
+    <div id="bottom" class="controls">
+        <select name="language">
+            <option value="plaintext">Plain Text</option>
+            <option value="go">Go</option>
+            <option value="another-language">Another language</option>
+            <option value="yet-another-language">Yet another language</option>
+        </select>
+    </div>
+
+</form>
+{{ end }}

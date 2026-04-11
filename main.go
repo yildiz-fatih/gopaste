@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 )
@@ -19,5 +20,21 @@ func main() {
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello GoPaste"))
+	tmplFiles := []string{
+		"./views/base.tmpl", // base must be parsed first
+		"./views/home.tmpl",
+	}
+	tmpl, err := template.ParseFiles(tmplFiles...)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError) // TODO: make a custom error page
+		return
+	}
+
+	err = tmpl.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError) // TODO: make a custom error page
+		return
+	}
 }

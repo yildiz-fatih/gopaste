@@ -13,15 +13,13 @@ func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl, err := template.ParseFiles(tmplFiles...)
 	if err != nil {
-		app.logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError) // TODO: make a custom error page
+		app.writeServerError(w, err)
 		return
 	}
 
 	err = tmpl.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		app.logger.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError) // TODO: make a custom error page
+		app.writeServerError(w, err)
 		return
 	}
 }

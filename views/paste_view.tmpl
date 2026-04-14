@@ -1,0 +1,29 @@
+{{ define "title" }}Paste{{ end }}
+{{ define "main" }}
+<pre id="content"><code>{{ .Paste.Content }}</code></pre>
+
+<div id="top" class="controls">
+    <button title="Copy" id="copy-content">
+        <img src="/static/icons/copy.svg" alt="Copy">
+    </button>
+
+    <button type="button" onclick="window.location.href='/'" title="New">
+        <img src="/static/icons/plus.svg" alt="New">
+    </button>
+
+    <button type="button" onclick="window.location.href='/help'" title="Help">
+        <img src="/static/icons/message-circle-question-mark.svg" alt="Help">
+    </button>
+
+    <div>Expires in {{ .Paste.Expires.Format "2 Jan 2006" }}</div>
+
+    <!-- put the QR code here -->
+
+    <!-- put the actual link here once i add the feature, should be a field in Paste -->
+    <div>{{ .Paste.ID }}</div>
+</div>
+
+<div id="bottom" class="controls">
+    {{ .Paste.Language }}
+</div>
+{{ end }}

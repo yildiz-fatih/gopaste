@@ -29,7 +29,6 @@ func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// placeholder code for now
 func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
@@ -52,7 +51,25 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	fmt.Fprintf(w, "ID: %d,\nContent: %s,\nLanguage: %s,\nCreated: %s,\nExpires: %s\n", p.ID, p.Content, p.Language, p.Created, p.Expires)
+	tmplFiles := []string{
+		"./views/base.tmpl", // base must be parsed first
+		"./views/paste_view.tmpl",
+	}
+	tmpl, err := template.ParseFiles(tmplFiles...)
+	if err != nil {
+		app.writeServerError(w, err)
+		return
+	}
+
+	data := templateData{
+		Paste: p,
+	}
+
+	err = tmpl.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.writeServerError(w, err)
+		return
+	}
 }
 
 // placeholder code for now

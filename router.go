@@ -12,5 +12,5 @@ func (app *application) newRouter() http.Handler {
 	mux.HandleFunc("GET /help", app.handleHelp)
 
 	// return mux
-	return app.logRequest(mux)
+	return app.recoverPanic(app.logRequest(mux))
 }

@@ -2,7 +2,7 @@ package main
 
 import "net/http"
 
-func (app *application) newRouter() *http.ServeMux {
+func (app *application) newRouter() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
@@ -11,5 +11,6 @@ func (app *application) newRouter() *http.ServeMux {
 	mux.HandleFunc("POST /paste", app.handlePasteCreate)
 	mux.HandleFunc("GET /help", app.handleHelp)
 
-	return mux
+	// return mux
+	return app.logRequest(mux)
 }

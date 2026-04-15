@@ -7,8 +7,6 @@ func (app *application) writeServerError(w http.ResponseWriter, err error) {
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) // TODO: make a custom error page
 }
 
-/*
-func (app *application) writeClientError() {
-	// not needed yet
+func (app *application) writeClientError(w http.ResponseWriter, statusCode int) {
+	http.Error(w, http.StatusText(statusCode), statusCode)
 }
-*/

@@ -72,18 +72,28 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// placeholder code for now
 func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request) {
-	content := "example content"
-	language := "plaintext"
-	expires := 7 // days
+	err := r.ParseForm()
+	if err != nil {
+		app.writeClientError(w, http.StatusBadRequest)
+		return
+	}
+
+	content := r.PostForm.Get("content")
+	language := r.PostForm.Get("language")
+
+	expires, err := strconv.Atoi(r.PostForm.Get("expires")) // hours
+	if err != nil {
+		app.writeClientError(w, http.StatusBadRequest)
+		return
+	}
 
 	query := `INSERT INTO pastes (content, language, created, expires) 
-	VALUES ($1, $2, NOW(), NOW() + $3 * INTERVAL '1 day')
+	VALUES ($1, $2, NOW(), NOW() + $3 * INTERVAL '1 hour')
 	RETURNING id`
 
 	var id int
-	err := app.db.QueryRow(query, content, language, expires).Scan(&id)
+	err = app.db.QueryRow(query, content, language, expires).Scan(&id)
 	if err != nil {
 		app.writeServerError(w, err)
 		return

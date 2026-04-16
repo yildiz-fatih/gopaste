@@ -29,7 +29,7 @@ func (m *PasteModel) Get(id int) (Paste, error) {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			// http.NotFound(w, r)
-			return Paste{}, err
+			return Paste{}, ErrNotFound
 		} else {
 			// app.writeServerError(w, err)
 			return Paste{}, err

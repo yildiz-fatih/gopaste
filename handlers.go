@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/yildiz-fatih/gopaste/internal/models"
 )
 
 func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -19,8 +22,13 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 
 	p, err := app.pasteModel.Get(id)
 	if err != nil {
-		app.writeServerError(w, err)
-		return
+		if errors.Is(err, models.ErrNotFound) {
+			http.NotFound(w, r)
+			return
+		} else {
+			app.writeServerError(w, err)
+			return
+		}
 	}
 
 	data := templateData{

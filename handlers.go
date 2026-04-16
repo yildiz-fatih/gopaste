@@ -11,17 +11,7 @@ import (
 )
 
 func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
-	tmpl, ok := app.templates["home.tmpl"]
-	if !ok {
-		app.writeServerError(w, errors.New("Template not found in cache"))
-		return
-	}
-
-	err := tmpl.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.writeServerError(w, err)
-		return
-	}
+	app.writeTemplate(w, "home.tmpl", nil)
 }
 
 func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) {
@@ -46,21 +36,11 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	tmpl, ok := app.templates["paste_view.tmpl"]
-	if !ok {
-		app.writeServerError(w, errors.New("Template not found in cache"))
-		return
-	}
-
 	data := templateData{
 		Paste: p,
 	}
 
-	err = tmpl.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.writeServerError(w, err)
-		return
-	}
+	app.writeTemplate(w, "paste_view.tmpl", data)
 }
 
 func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request) {

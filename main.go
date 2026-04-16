@@ -11,12 +11,13 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/yildiz-fatih/gopaste/internal/models"
 )
 
 type application struct {
-	logger    *slog.Logger
-	db        *sql.DB
-	templates map[string]*template.Template
+	logger     *slog.Logger
+	pasteModel *models.PasteModel
+	templates  map[string]*template.Template
 }
 
 func main() {
@@ -57,9 +58,9 @@ func main() {
 	}
 
 	app := &application{
-		logger:    logger,
-		db:        db,
-		templates: parsedTemplates,
+		logger:     logger,
+		pasteModel: &models.PasteModel{DB: db},
+		templates:  parsedTemplates,
 	}
 
 	server := &http.Server{

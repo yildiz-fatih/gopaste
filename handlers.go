@@ -1,13 +1,9 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
-
-	"github.com/yildiz-fatih/gopaste/internal/models"
 )
 
 func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -21,18 +17,9 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	query := `SELECT id, content, language, created, expires 
-	FROM pastes 
-	WHERE expires > NOW() AND id = $1`
-
-	var p models.Paste
-	err = app.db.QueryRow(query, id).Scan(&p.ID, &p.Content, &p.Language, &p.Created, &p.Expires)
+	p, err := app.pasteModel.Get(id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			http.NotFound(w, r)
-		} else {
-			app.writeServerError(w, err)
-		}
+		app.writeServerError(w, err)
 		return
 	}
 
@@ -59,12 +46,7 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	query := `INSERT INTO pastes (content, language, created, expires) 
-	VALUES ($1, $2, NOW(), NOW() + $3 * INTERVAL '1 hour')
-	RETURNING id`
-
-	var id int
-	err = app.db.QueryRow(query, content, language, expires).Scan(&id)
+	id, err := app.pasteModel.Insert(content, language, expires)
 	if err != nil {
 		app.writeServerError(w, err)
 		return

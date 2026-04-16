@@ -53,8 +53,14 @@ func main() {
 		db:     db,
 	}
 
+	server := &http.Server{
+		Addr:     fmt.Sprintf("%s:%d", host, port),
+		Handler:  app.newRouter(),
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	}
+
 	logger.Info("Starting server", "host", host, "port", port)
-	err = http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), app.newRouter()) // err is always non-nil
+	err = server.ListenAndServe() // err is always non-nil
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)

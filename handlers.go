@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -12,17 +11,13 @@ import (
 )
 
 func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
-	tmplFiles := []string{
-		"./views/base.tmpl", // base must be parsed first
-		"./views/home.tmpl",
-	}
-	tmpl, err := template.ParseFiles(tmplFiles...)
-	if err != nil {
-		app.writeServerError(w, err)
+	tmpl, ok := app.templates["home.tmpl"]
+	if !ok {
+		app.writeServerError(w, errors.New("Template not found in cache"))
 		return
 	}
 
-	err = tmpl.ExecuteTemplate(w, "base", nil)
+	err := tmpl.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		app.writeServerError(w, err)
 		return
@@ -51,13 +46,9 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	tmplFiles := []string{
-		"./views/base.tmpl", // base must be parsed first
-		"./views/paste_view.tmpl",
-	}
-	tmpl, err := template.ParseFiles(tmplFiles...)
-	if err != nil {
-		app.writeServerError(w, err)
+	tmpl, ok := app.templates["paste_view.tmpl"]
+	if !ok {
+		app.writeServerError(w, errors.New("Template not found in cache"))
 		return
 	}
 

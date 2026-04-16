@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,8 +14,9 @@ import (
 )
 
 type application struct {
-	logger *slog.Logger
-	db     *sql.DB
+	logger    *slog.Logger
+	db        *sql.DB
+	templates map[string]*template.Template
 }
 
 func main() {
@@ -48,9 +50,16 @@ func main() {
 	}
 	logger.Info("Connected to the database")
 
+	parsedTemplates, err := parseTemplates()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := &application{
-		logger: logger,
-		db:     db,
+		logger:    logger,
+		db:        db,
+		templates: parsedTemplates,
 	}
 
 	server := &http.Server{

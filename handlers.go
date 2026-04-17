@@ -46,7 +46,6 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 	}
 
 	content := r.PostForm.Get("content")
-	language := r.PostForm.Get("language")
 
 	expires, err := strconv.Atoi(r.PostForm.Get("expires")) // hours
 	if err != nil {
@@ -54,7 +53,7 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	id, err := app.pasteModel.Insert(content, language, expires)
+	id, err := app.pasteModel.Insert(content, expires)
 	if err != nil {
 		app.writeServerError(w, err)
 		return

@@ -23,7 +23,10 @@
     <div>{{ .Paste.ID }}</div>
 </div>
 
-<div id="bottom" class="controls">
-    {{ .Paste.Language }}
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const block = document.querySelector('#content code')
+        hljs.highlightElement(block)
+    })
+</script>
 {{ end }}

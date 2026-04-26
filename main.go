@@ -2,12 +2,12 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
@@ -18,14 +18,11 @@ type application struct {
 	logger     *slog.Logger
 	pasteModel *models.PasteModel
 	templates  map[string]*template.Template
+	baseURL    string
 }
 
 func main() {
 	host := "0.0.0.0"
-	var port int
-
-	flag.IntVar(&port, "port", 8080, "Port to listen on")
-	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -33,7 +30,24 @@ func main() {
 
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		logger.Error("DATABASE_URL environment variable is not set")
+		logger.Error("DATABASE_URL is not set")
+		os.Exit(1)
+	}
+
+	portStr := os.Getenv("PORT")
+	if portStr == "" {
+		logger.Error("PORT is not set")
+		os.Exit(1)
+	}
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		logger.Error("Invalid PORT value")
+		os.Exit(1)
+	}
+
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		logger.Error("BASE_URL is not set")
 		os.Exit(1)
 	}
 
@@ -61,6 +75,7 @@ func main() {
 		logger:     logger,
 		pasteModel: &models.PasteModel{DB: db},
 		templates:  parsedTemplates,
+		baseURL:    baseURL,
 	}
 
 	server := &http.Server{

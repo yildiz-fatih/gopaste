@@ -14,13 +14,9 @@ func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
+	slug := r.PathValue("slug")
 
-	p, err := app.pasteModel.Get(id)
+	p, err := app.pasteModel.Get(slug)
 	if err != nil {
 		if errors.Is(err, models.ErrNotFound) {
 			http.NotFound(w, r)
@@ -32,7 +28,8 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 	}
 
 	data := templateData{
-		Paste: p,
+		Paste:   p,
+		FullURL: fmt.Sprintf("%s/paste/%s", app.baseURL, p.Slug),
 	}
 
 	app.writeTemplate(w, "paste_view.tmpl", data)
@@ -53,13 +50,13 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	id, err := app.pasteModel.Insert(content, expires)
+	slug, err := app.pasteModel.Insert(content, expires)
 	if err != nil {
 		app.writeServerError(w, err)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/paste/%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/paste/%s", slug), http.StatusSeeOther)
 }
 
 func (app *application) handleHelp(w http.ResponseWriter, r *http.Request) {

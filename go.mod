@@ -3,6 +3,7 @@ module github.com/yildiz-fatih/gopaste
 go 1.25.6
 
 require (
+	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/joho/godotenv v1.5.1
 )

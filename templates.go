@@ -9,7 +9,8 @@ import (
 )
 
 type templateData struct {
-	Paste models.Paste
+	Paste   models.Paste
+	FullURL string
 }
 
 func parseTemplates() (map[string]*template.Template, error) {

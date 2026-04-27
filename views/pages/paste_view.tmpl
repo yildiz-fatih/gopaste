@@ -17,15 +17,22 @@
 
     <div>Expires in {{ .Paste.Expires.Format "2 Jan 2006" }}</div>
 
-    <!-- put the QR code here -->
+    <div id="qrcode"></div>
 
     <div>{{ .FullURL }}</div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // highlight code
         const block = document.querySelector('#content code')
         hljs.highlightElement(block)
+        // generate qr code
+        var qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: window.location.href,
+            width: 124,
+            height: 124
+        })
     })
 </script>
 {{ end }}

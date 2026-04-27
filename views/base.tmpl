@@ -34,6 +34,8 @@
         #top { top: 20px; }
         #top button { background: transparent; border: none; cursor: pointer; padding: 0 8px; }
         #top button img { width: 32px; height: 32px; }
+        /* disable qr code img select and drag */
+        #qrcode img { pointer-events: none; -webkit-user-drag: none; user-select: none; }
         /* invert icons in dark mode */
         @media (prefers-color-scheme: dark) {
             #top img {

@@ -29,4 +29,17 @@
     </div>
 
 </form>
+
+<script>
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault()
+            document.querySelector('form').submit()
+        }
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault()
+            window.location.href = '/'
+        }
+    })
+</script>
 {{ end }}

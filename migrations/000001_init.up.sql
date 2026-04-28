@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS pastes (
+    id SERIAL PRIMARY KEY,
+    slug TEXT UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    created TIMESTAMPTZ NOT NULL,
+    expires TIMESTAMPTZ NOT NULL
+);

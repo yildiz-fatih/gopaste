@@ -9,7 +9,6 @@ func (app *application) newRouter() http.Handler {
 	mux.HandleFunc("GET /{$}", app.handleHome)
 	mux.HandleFunc("GET /paste/{slug}", app.handlePasteView)
 	mux.HandleFunc("POST /paste", app.handlePasteCreate)
-	mux.HandleFunc("GET /help", app.handleHelp)
 
 	// return mux
 	return app.recoverPanic(app.logRequest(mux))

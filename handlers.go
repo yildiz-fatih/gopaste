@@ -58,7 +58,3 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 
 	http.Redirect(w, r, fmt.Sprintf("/paste/%s", slug), http.StatusSeeOther)
 }
-
-func (app *application) handleHelp(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("help"))
-}

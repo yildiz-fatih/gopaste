@@ -24,7 +24,7 @@ type PasteModel struct {
 }
 
 func randomSlug(length int) (string, error) {
-	const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+	const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	result := make([]byte, length)
 	for i := range length {

@@ -1,25 +1,26 @@
-{{ define "title" }}Paste{{ end }}
 {{ define "main" }}
 <pre id="content"><code>{{ .Paste.Content }}</code></pre>
 
 <div id="top" class="controls">
-    <button title="Copy" id="copy-content">
-        <img src="/static/icons/copy.svg" alt="Copy">
-    </button>
+    <div class="icon-row">
+        <button type="button" title="copy" id="copy-content">
+            <img src="/static/icons/copy.svg" alt="Copy">
+        </button>
 
-    <button type="button" onclick="window.location.href='/'" title="New">
-        <img src="/static/icons/plus.svg" alt="New">
-    </button>
+        <button type="button" title="new (ctrl+n)" onclick="window.location.href='/'">
+            <img src="/static/icons/plus.svg" alt="New">
+        </button>
 
-    <button type="button" onclick="window.location.href='/paste/help'" title="Help">
-        <img src="/static/icons/message-circle-question-mark.svg" alt="Help">
-    </button>
+        <button type="button" title="help" onclick="window.location.href='/paste/help'">
+            <img src="/static/icons/message-circle-question-mark.svg" alt="Help">
+        </button>
+    </div>
 
-    <div>Expires in {{ .Paste.Expires.Format "2 Jan 2006" }}</div>
+    <div>expires: {{ .Paste.Expires.Format "2 Jan 2006" }}</div>
 
     <div id="qrcode"></div>
 
-    <div>{{ .FullURL }}</div>
+    <div class="paste-url">{{ .FullURL }}</div>
 </div>
 
 <script>

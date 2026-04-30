@@ -65,6 +65,22 @@ func main() {
 	}
 	logger.Info("Connected to the database")
 
+	// upsert the help paste (insert if not exists, update if it does)
+	helpPaste, err := os.ReadFile("help.md")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	query := `INSERT INTO pastes (slug, content, created, expires) 
+	VALUES ('help', $1, NOW(), NOW() + INTERVAL '100 years')
+	ON CONFLICT (slug) DO UPDATE SET content = EXCLUDED.content`
+	_, err = db.Exec(query, string(helpPaste))
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	logger.Info("Help paste upserted")
+
 	parsedTemplates, err := parseTemplates()
 	if err != nil {
 		logger.Error(err.Error())

@@ -1,5 +1,3 @@
-INSERT INTO pastes (slug, content, created, expires)
-VALUES ('help', $$
 # welcome to the world of gopaste!
 
 > our servers are replaceable, your paste isn't
@@ -21,6 +19,3 @@ so i thought:
 > with syntax highlighting and keyboard navigation
 >
 > in fact, forget the pastebin!
-
-$$, NOW(), NOW() + INTERVAL '100 years')
-ON CONFLICT (slug) DO UPDATE SET content = EXCLUDED.content;

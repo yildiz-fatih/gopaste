@@ -1,6 +1,6 @@
 # gopaste
 
-GoPaste is a minimal, self-hostable pastebin built with Go and PostgreSQL.
+GoPaste is a minimal, self-hostable pastebin built with Go, PostgreSQL and Redis.
 
 ## Quick Start
 
@@ -17,7 +17,7 @@ docker compose up # runs on http://localhost:8080
 cp .env.example .env
 # open .env and change the password values
  
-docker compose up db
+docker compose up db redis
 
 export DATABASE_URL=<DATABASE_URL from your .env>
 migrate -path migrations -database $DATABASE_URL up

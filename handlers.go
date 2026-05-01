@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/yildiz-fatih/gopaste/internal/models"
 )
@@ -50,11 +52,24 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	slug, err := app.pasteModel.Insert(content, expires)
+	// write to database
+	paste, err := app.pasteModel.Insert(content, expires)
 	if err != nil {
 		app.writeServerError(w, err)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/paste/%s", slug), http.StatusSeeOther)
+	// write to redis
+	pasteJson, err := json.Marshal(paste)
+	if err != nil {
+		app.writeServerError(w, err)
+		return
+	}
+
+	err = app.redisClient.Set(r.Context(), fmt.Sprintf("paste:%s", paste.Slug), pasteJson, time.Until(paste.Expires)).Err()
+	if err != nil {
+		app.logger.Error("Failed to cache paste in redis", "error", err)
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/paste/%s", paste.Slug), http.StatusSeeOther)
 }

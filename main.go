@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"html/template"
@@ -11,14 +12,16 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	"github.com/yildiz-fatih/gopaste/internal/models"
 )
 
 type application struct {
-	logger     *slog.Logger
-	pasteModel *models.PasteModel
-	templates  map[string]*template.Template
-	baseURL    string
+	logger      *slog.Logger
+	pasteModel  *models.PasteModel
+	templates   map[string]*template.Template
+	baseURL     string
+	redisClient *redis.Client
 }
 
 func main() {
@@ -51,6 +54,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		logger.Error("REDIS_URL is not set")
+		os.Exit(1)
+	}
+
 	db, err := sql.Open("pgx", dbURL)
 	if err != nil {
 		logger.Error(err.Error())
@@ -64,6 +73,22 @@ func main() {
 		os.Exit(1)
 	}
 	logger.Info("Connected to the database")
+
+	redisOptions, err := redis.ParseURL(redisURL)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	redisClient := redis.NewClient(redisOptions)
+	defer redisClient.Close()
+
+	err = redisClient.Ping(context.Background()).Err()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	logger.Info("Connected to Redis")
 
 	// upsert the help paste (insert if not exists, update if it does)
 	helpPaste, err := os.ReadFile("help.md")
@@ -88,10 +113,11 @@ func main() {
 	}
 
 	app := &application{
-		logger:     logger,
-		pasteModel: &models.PasteModel{DB: db},
-		templates:  parsedTemplates,
-		baseURL:    baseURL,
+		logger:      logger,
+		pasteModel:  &models.PasteModel{DB: db},
+		templates:   parsedTemplates,
+		baseURL:     baseURL,
+		redisClient: redisClient,
 	}
 
 	server := &http.Server{

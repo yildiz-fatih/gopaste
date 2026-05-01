@@ -57,10 +57,10 @@ func (m *PasteModel) Get(slug string) (Paste, error) {
 	return p, nil
 }
 
-func (m *PasteModel) Insert(content string, expires int) (string, error) {
+func (m *PasteModel) Insert(content string, expires int) (Paste, error) {
 	query := `INSERT INTO pastes (slug, content, created, expires) 
 	VALUES ($1, $2, NOW(), NOW() + $3 * INTERVAL '1 hour')
-	RETURNING slug`
+	RETURNING *`
 
 	const slugLength = 6
 	const maxRetries = 3
@@ -69,11 +69,11 @@ func (m *PasteModel) Insert(content string, expires int) (string, error) {
 	for range maxRetries {
 		slug, err := randomSlug(slugLength)
 		if err != nil {
-			return "", err
+			return Paste{}, err
 		}
 
-		var insertedSlug string
-		err = m.DB.QueryRow(query, slug, content, expires).Scan(&insertedSlug)
+		var paste Paste
+		err = m.DB.QueryRow(query, slug, content, expires).Scan(&paste.ID, &paste.Slug, &paste.Content, &paste.Created, &paste.Expires)
 		if err != nil {
 			// (expected) unique violation error, run the loop again
 			var pgErr *pgconn.PgError
@@ -82,13 +82,13 @@ func (m *PasteModel) Insert(content string, expires int) (string, error) {
 			}
 
 			// (unexpected) database error
-			return "", err
+			return Paste{}, err
 		}
 
-		return insertedSlug, nil
+		return paste, nil
 
 	}
 
 	// exhausted retries, return error
-	return "", errors.New("failed to generate unique slug")
+	return Paste{}, errors.New("failed to generate unique slug")
 }

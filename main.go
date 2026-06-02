@@ -9,11 +9,19 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"github.com/yildiz-fatih/gopaste/internal/models"
+)
+
+const (
+	readHeaderTimeout = 5 * time.Second
+	readTimeout       = 10 * time.Second
+	writeTimeout      = 20 * time.Second
+	idleTimeout       = 120 * time.Second
 )
 
 type application struct {
@@ -121,9 +129,13 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:     fmt.Sprintf("%s:%d", host, port),
-		Handler:  app.newRouter(),
-		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		Addr:              fmt.Sprintf("%s:%d", host, port),
+		Handler:           app.newRouter(),
+		ErrorLog:          slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		ReadHeaderTimeout: readHeaderTimeout,
+		ReadTimeout:       readTimeout,
+		WriteTimeout:      writeTimeout,
+		IdleTimeout:       idleTimeout,
 	}
 
 	logger.Info("Starting server", "host", host, "port", port)

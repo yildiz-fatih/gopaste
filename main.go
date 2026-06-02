@@ -3,12 +3,9 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"html/template"
 	"log/slog"
-	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -33,8 +30,6 @@ type application struct {
 }
 
 func main() {
-	host := "0.0.0.0"
-
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	_ = godotenv.Load()
@@ -45,14 +40,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	portStr := os.Getenv("PORT")
-	if portStr == "" {
+	port := os.Getenv("PORT")
+	if port == "" {
 		logger.Error("PORT is not set")
-		os.Exit(1)
-	}
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		logger.Error("Invalid PORT value")
 		os.Exit(1)
 	}
 
@@ -128,18 +118,8 @@ func main() {
 		redisClient: redisClient,
 	}
 
-	server := &http.Server{
-		Addr:              fmt.Sprintf("%s:%d", host, port),
-		Handler:           app.newRouter(),
-		ErrorLog:          slog.NewLogLogger(logger.Handler(), slog.LevelError),
-		ReadHeaderTimeout: readHeaderTimeout,
-		ReadTimeout:       readTimeout,
-		WriteTimeout:      writeTimeout,
-		IdleTimeout:       idleTimeout,
-	}
-
-	logger.Info("Starting server", "host", host, "port", port)
-	err = server.ListenAndServe() // err is always non-nil
+	// server
+	err = app.serve(":" + port)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)

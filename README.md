@@ -17,10 +17,7 @@ docker compose up # runs on http://localhost:8080
 cp .env.example .env
 # open .env and change the password values
  
-docker compose up db redis
-
-export DATABASE_URL=<DATABASE_URL from your .env>
-migrate -path migrations -database $DATABASE_URL up
+docker compose up db migrate redis
 
 go run . # runs on http://localhost:8080
 ```

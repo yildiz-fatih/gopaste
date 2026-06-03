@@ -23,7 +23,13 @@ type PasteModel struct {
 	DB *sql.DB
 }
 
+var errInvalidLength = errors.New("length must be 1 or more")
+
 func randomSlug(length int) (string, error) {
+	if length <= 0 {
+		return "", errInvalidLength
+	}
+
 	const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	result := make([]byte, length)

@@ -19,6 +19,11 @@ type Paste struct {
 	Expires time.Time
 }
 
+type PasteRepository interface {
+	Get(slug string) (Paste, error)
+	Insert(content string, expires int) (Paste, error)
+}
+
 type PasteModel struct {
 	DB *sql.DB
 }

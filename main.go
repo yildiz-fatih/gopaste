@@ -23,10 +23,10 @@ const (
 
 type application struct {
 	logger      *slog.Logger
-	pasteModel  *models.PasteModel
+	pasteModel  models.PasteRepository
 	templates   map[string]*template.Template
 	baseURL     string
-	redisClient *redis.Client
+	redisClient models.RedisRepository
 }
 
 func main() {
@@ -115,7 +115,7 @@ func main() {
 		pasteModel:  &models.PasteModel{DB: db},
 		templates:   parsedTemplates,
 		baseURL:     baseURL,
-		redisClient: redisClient,
+		redisClient: &models.RedisModel{Client: redisClient},
 	}
 
 	// server

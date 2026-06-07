@@ -23,7 +23,7 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 	var p models.Paste
 
 	// check redis cache first
-	cachedPaste, err := app.redisClient.Get(r.Context(), fmt.Sprintf("paste:%s", slug)).Result()
+	cachedPaste, err := app.redisClient.Get(r.Context(), fmt.Sprintf("paste:%s", slug))
 	if err != nil && err != redis.Nil {
 		// something went wrong with redis, and it's not a cache miss
 		app.logger.Error("redis get error", "error", err)
@@ -55,7 +55,7 @@ func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) 
 		if err != nil {
 			app.logger.Error("redis marshal error", "error", err)
 		} else {
-			err = app.redisClient.Set(r.Context(), fmt.Sprintf("paste:%s", p.Slug), pasteJson, time.Until(p.Expires)).Err()
+			err = app.redisClient.Set(r.Context(), fmt.Sprintf("paste:%s", p.Slug), pasteJson, time.Until(p.Expires))
 			if err != nil {
 				app.logger.Error("redis set error", "error", err)
 			}
@@ -97,7 +97,7 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.logger.Error("redis marshal error", "error", err)
 	} else {
-		err = app.redisClient.Set(r.Context(), fmt.Sprintf("paste:%s", paste.Slug), pasteJson, time.Until(paste.Expires)).Err()
+		err = app.redisClient.Set(r.Context(), fmt.Sprintf("paste:%s", paste.Slug), pasteJson, time.Until(paste.Expires))
 		if err != nil {
 			app.logger.Error("redis set error", "error", err)
 		}

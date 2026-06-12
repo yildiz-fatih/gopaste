@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -26,7 +27,7 @@ func (m *mockPasteModel) Get(slug string) (models.Paste, error) {
 }
 
 func (m *mockPasteModel) Insert(content string, expires int) (models.Paste, error) {
-	panic("not implemented") // TODO: Implement
+	return m.paste, m.err // return the preset paste and error
 }
 
 // implements models.RedisRepository
@@ -126,11 +127,7 @@ func TestHandlePasteView(t *testing.T) {
 			// make request and record response
 			resRecorder := httptest.NewRecorder()
 
-			req, err := http.NewRequest(http.MethodGet, "/paste/"+slug, nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-
+			req := httptest.NewRequest(http.MethodGet, "/paste/"+slug, nil)
 			req.SetPathValue("slug", slug)
 
 			app.handlePasteView(resRecorder, req)
@@ -145,6 +142,108 @@ func TestHandlePasteView(t *testing.T) {
 
 			if tt.wantBody != "" && !strings.Contains(gotBody, tt.wantBody) {
 				t.Errorf("body: want it to contain %q, got\n%q", tt.wantBody, gotBody)
+			}
+		})
+	}
+}
+
+func TestHandlePasteCreate(t *testing.T) {
+	/*
+		contract:
+			in: 	http request (POST, form in body)
+			out:	http response (303 redirect, "/paste/createdslug")
+	*/
+	/*
+		happy:
+			- "valid form, 303 redirect"
+		sad:
+			- "invalid form, 400" -> hard to test, ignored
+			- "invalid expires field, 400"
+			- "db write fails, 500"
+	*/
+	slug := "abc123"
+	pasteContent := "hello world"
+
+	// The paste our fake DB will "return"
+	dbPaste := models.Paste{
+		ID:      1,
+		Slug:    slug,
+		Content: pasteContent,
+		Created: time.Now(),
+		Expires: time.Now().Add(time.Hour),
+	}
+
+	tests := []struct {
+		name         string       // test name
+		formValues   url.Values   // form values for request body
+		dbPaste      models.Paste // mock return value
+		dbErr        error        // mock return value
+		wantCode     int          // expected status code
+		wantLocation string       // expected Location header
+	}{
+		{
+			name: "valid form, 303 redirect",
+			formValues: url.Values{
+				"content": {pasteContent},
+				"expires": {"60"},
+			},
+			dbPaste:      dbPaste,
+			dbErr:        nil,
+			wantCode:     http.StatusSeeOther,
+			wantLocation: "/paste/" + slug,
+		},
+		{
+			name: "invalid expires field, 400",
+			formValues: url.Values{
+				"content": {pasteContent},
+				"expires": {"notanumber"},
+			},
+			dbErr:    nil,
+			wantCode: http.StatusBadRequest,
+		},
+		{
+			name: "db write fails, 500",
+			formValues: url.Values{
+				"content": {pasteContent},
+				"expires": {"60"},
+			},
+			dbErr:    errors.New("database error"),
+			wantCode: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			app := &application{
+				logger: slog.New(slog.DiscardHandler), // discard logs during tests
+				pasteModel: &mockPasteModel{
+					paste: tt.dbPaste,
+					err:   tt.dbErr,
+				},
+				templates:   nil,
+				baseURL:     "http://localhost:1234",
+				redisClient: &mockRedisClient{},
+			}
+
+			// make request and record response
+			resRecorder := httptest.NewRecorder()
+
+			body := strings.NewReader(tt.formValues.Encode())
+			req := httptest.NewRequest(http.MethodPost, "/paste", body)
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+			app.handlePasteCreate(resRecorder, req)
+
+			gotCode := resRecorder.Code
+			gotLocation := resRecorder.Header().Get("Location")
+
+			// assert
+			if tt.wantCode != gotCode {
+				t.Errorf("status: want %d, got %d", tt.wantCode, gotCode)
+			}
+
+			if tt.wantLocation != "" && tt.wantLocation != gotLocation {
+				t.Errorf("location: want %q, got %q", tt.wantLocation, gotLocation)
 			}
 		})
 	}

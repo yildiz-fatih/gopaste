@@ -5,7 +5,7 @@ dev:
 	docker compose up -d db migrate redis
 
 run:
-	go run .
+	go run ./cmd/web
 
 test:
 	go test ./...

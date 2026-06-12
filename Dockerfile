@@ -8,13 +8,13 @@ RUN go mod download
 
 COPY ./ ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /gopaste
+RUN CGO_ENABLED=0 GOOS=linux go build -o /gopaste ./cmd/web
 
 # Run stage
 FROM alpine:latest
 
 COPY --from=builder /gopaste /gopaste
-COPY --from=builder /app/views /views
+COPY --from=builder /app/cmd/web/views /views
 COPY --from=builder /app/static /static
 COPY --from=builder /app/help.md /help.md
 

@@ -1,8 +1,17 @@
+up:
+	docker compose up -d
+
+dev:
+	docker compose up -d db migrate redis
+
 run:
 	go run .
 
 test:
 	go test ./...
+
+test-v:
+	go test -v ./...
 
 cover:
 	go test ./... -coverprofile=coverage.out

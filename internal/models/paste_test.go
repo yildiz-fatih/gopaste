@@ -169,3 +169,27 @@ func TestPasteModel_Get(t *testing.T) {
 		}
 	})
 }
+
+func TestPasteModel_Insert(t *testing.T) {
+	t.Run("no collision", func(t *testing.T) {
+		// set up a test database
+		db := newTestDB(t)
+
+		pasteModel := PasteModel{DB: db}
+		wantContent := "test-content"
+		wantExpires := 1
+		gotPaste, err := pasteModel.Insert(wantContent, wantExpires)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if wantContent != gotPaste.Content {
+			t.Errorf("want %q, got %q", wantContent, gotPaste.Content)
+		}
+
+		gotExpires := int(gotPaste.Expires.Sub(gotPaste.Created).Hours())
+		if wantExpires != gotExpires {
+			t.Errorf("want %d, got %d", wantExpires, gotExpires)
+		}
+	})
+}

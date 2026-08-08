@@ -1,0 +1,3 @@
+gopaste.surf, www.gopaste.surf {
+    reverse_proxy app:8080
+}

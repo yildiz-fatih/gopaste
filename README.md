@@ -1,6 +1,10 @@
 # gopaste
 
+![CI/CD Pipeline](https://github.com/yildiz-fatih/gopaste/actions/workflows/pipeline.yml/badge.svg)
+
 GoPaste is a minimal, high-performance pastebin built with Go, PostgreSQL and Redis.
+
+**Live at [gopaste.surf](https://gopaste.surf)**
 
 ![Paste view](assets/pasteview.jpg)
 
@@ -39,3 +43,7 @@ make test-v       # run all tests (verbose)
 make cover        # print coverage summary
 make cover-html   # open coverage report in the browser
 ```
+
+## Deployment
+
+Runs on a DigitalOcean droplet using Docker Compose. Caddy handles the reverse proxy and automatic HTTPS. Every push to `main` is tested, built and deployed using GitHub Actions.

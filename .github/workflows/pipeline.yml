@@ -36,3 +36,13 @@ jobs:
                   context: .
                   push: true
                   tags: ghcr.io/${{ github.repository }}:latest
+
+            - name: Deploy to the droplet
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+                  ssh-keyscan -H 64.227.120.146 >> ~/.ssh/known_hosts
+                  ssh -i ~/.ssh/deploy_key fatih@64.227.120.146 "cd gopaste && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"

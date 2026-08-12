@@ -26,7 +26,7 @@ func (m *mockPasteModel) Get(slug string) (models.Paste, error) {
 	return m.paste, m.err // return the preset paste and error
 }
 
-func (m *mockPasteModel) Insert(content string, expires int) (models.Paste, error) {
+func (m *mockPasteModel) Insert(content string, expires int, hashedPassword *string) (models.Paste, error) {
 	return m.paste, m.err // return the preset paste and error
 }
 
@@ -148,19 +148,6 @@ func TestHandlePasteView(t *testing.T) {
 }
 
 func TestHandlePasteCreate(t *testing.T) {
-	/*
-		contract:
-			in: 	http request (POST, form in body)
-			out:	http response (303 redirect, "/paste/createdslug")
-	*/
-	/*
-		happy:
-			- "valid form, 303 redirect"
-		sad:
-			- "invalid form, 400" -> hard to test, ignored
-			- "invalid expires field, 400"
-			- "db write fails, 500"
-	*/
 	slug := "abc123"
 	pasteContent := "hello world"
 

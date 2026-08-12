@@ -9,7 +9,8 @@ import (
 )
 
 type templateData struct {
-	Paste   models.Paste
+	Error   string
+	Paste   *models.Paste
 	FullURL string
 }
 

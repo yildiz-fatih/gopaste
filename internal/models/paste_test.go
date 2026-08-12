@@ -121,7 +121,7 @@ func TestPasteModel_Get(t *testing.T) {
 	RETURNING *`
 		var paste Paste
 		slug := "test-slug"
-		err := db.QueryRow(query, slug, "test content", 1).Scan(&paste.ID, &paste.Slug, &paste.Content, &paste.Created, &paste.Expires)
+		err := db.QueryRow(query, slug, "test content", 1).Scan(&paste.ID, &paste.Slug, &paste.Content, &paste.Created, &paste.Expires, &paste.PasswordHash)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -178,7 +178,7 @@ func TestPasteModel_Insert(t *testing.T) {
 		pasteModel := PasteModel{DB: db}
 		wantContent := "test-content"
 		wantExpires := 1
-		gotPaste, err := pasteModel.Insert(wantContent, wantExpires)
+		gotPaste, err := pasteModel.Insert(wantContent, wantExpires, nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

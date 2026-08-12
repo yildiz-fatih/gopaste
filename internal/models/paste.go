@@ -12,16 +12,17 @@ import (
 )
 
 type Paste struct {
-	ID      int
-	Slug    string
-	Content string
-	Created time.Time
-	Expires time.Time
+	ID           int
+	Slug         string
+	Content      string
+	PasswordHash *string
+	Created      time.Time
+	Expires      time.Time
 }
 
 type PasteRepository interface {
 	Get(slug string) (Paste, error)
-	Insert(content string, expires int) (Paste, error)
+	Insert(content string, expires int, hashedPassword *string) (Paste, error)
 }
 
 type PasteModel struct {
@@ -50,13 +51,13 @@ func randomSlug(length int) (string, error) {
 }
 
 func (m *PasteModel) Get(slug string) (Paste, error) {
-	query := `SELECT id, slug, content, created, expires 
+	query := `SELECT id, slug, content, created, expires, password_hash
 	FROM pastes 
 	WHERE expires > NOW() AND slug = $1`
 
 	var p Paste
 
-	err := m.DB.QueryRow(query, slug).Scan(&p.ID, &p.Slug, &p.Content, &p.Created, &p.Expires)
+	err := m.DB.QueryRow(query, slug).Scan(&p.ID, &p.Slug, &p.Content, &p.Created, &p.Expires, &p.PasswordHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Paste{}, ErrNotFound
@@ -68,9 +69,9 @@ func (m *PasteModel) Get(slug string) (Paste, error) {
 	return p, nil
 }
 
-func (m *PasteModel) Insert(content string, expires int) (Paste, error) {
-	query := `INSERT INTO pastes (slug, content, created, expires) 
-	VALUES ($1, $2, NOW(), NOW() + $3 * INTERVAL '1 hour')
+func (m *PasteModel) Insert(content string, expires int, hashedPassword *string) (Paste, error) {
+	query := `INSERT INTO pastes (slug, content, created, expires, password_hash) 
+	VALUES ($1, $2, NOW(), NOW() + $3 * INTERVAL '1 hour', $4)
 	RETURNING *`
 
 	const slugLength = 6
@@ -84,7 +85,7 @@ func (m *PasteModel) Insert(content string, expires int) (Paste, error) {
 		}
 
 		var paste Paste
-		err = m.DB.QueryRow(query, slug, content, expires).Scan(&paste.ID, &paste.Slug, &paste.Content, &paste.Created, &paste.Expires)
+		err = m.DB.QueryRow(query, slug, content, expires, hashedPassword).Scan(&paste.ID, &paste.Slug, &paste.Content, &paste.Created, &paste.Expires, &paste.PasswordHash)
 		if err != nil {
 			// (expected) unique violation error, run the loop again
 			var pgErr *pgconn.PgError

@@ -1,4 +1,7 @@
 {{ define "main" }}
+
+{{ if .Paste }}
+
 <pre id="content"><code>{{ .Paste.Content }}</code></pre>
 
 <div id="top" class="controls">
@@ -43,4 +46,26 @@
         }
     })
 </script>
+
+{{ else }}
+<div class="lock">
+    <form action="{{ .FullURL }}" method="POST">
+        <img src="/static/icons/lock.svg" alt="Locked">
+        {{ if .Error }}
+            <p>{{ .Error }}</p>
+        {{ end }}
+        <input type="password" name="password" id="password" placeholder="password">
+        <button type="submit">unlock</button>
+    </form>
+</div>
+
+<style>
+    .lock { height: 100%; display: flex; align-items: center; justify-content: center; }
+    .lock form { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .lock img { width: 32px; height: 32px; }
+    @media (prefers-color-scheme: dark) { .lock img { filter: invert(1); } }
+    .lock input, .lock button { font-size: 16px; padding: 10px 14px; }
+</style>
+{{ end }}
+
 {{ end }}

@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/yildiz-fatih/gopaste/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
@@ -19,53 +20,28 @@ func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
 func (app *application) handlePasteView(w http.ResponseWriter, r *http.Request) {
 	slug := r.PathValue("slug")
 
-	cacheHit := false
-	var p models.Paste
-
-	// check redis cache first
-	cachedPaste, err := app.redisClient.Get(r.Context(), fmt.Sprintf("paste:%s", slug))
-	if err != nil && err != redis.Nil {
-		// something went wrong with redis, and it's not a cache miss
-		app.logger.Error("redis get error", "error", err)
-	} else if err == nil {
-		// cache hit!
-		err = json.Unmarshal([]byte(cachedPaste), &p)
-		if err != nil {
-			app.logger.Error("redis unmarshal error", "error", err)
+	p, err := app.getPaste(r.Context(), slug)
+	if err != nil {
+		if errors.Is(err, models.ErrNotFound) {
+			http.NotFound(w, r)
+			return
 		} else {
-			cacheHit = true
+			app.writeServerError(w, err)
+			return
 		}
 	}
 
-	if !cacheHit {
-		// get from database
-		p, err = app.pasteModel.Get(slug)
-		if err != nil {
-			if errors.Is(err, models.ErrNotFound) {
-				http.NotFound(w, r)
-				return
-			} else {
-				app.writeServerError(w, err)
-				return
-			}
-		}
+	var data templateData
 
-		// write to redis cache
-		pasteJson, err := json.Marshal(p)
-		if err != nil {
-			app.logger.Error("redis marshal error", "error", err)
-		} else {
-			err = app.redisClient.Set(r.Context(), fmt.Sprintf("paste:%s", p.Slug), pasteJson, time.Until(p.Expires))
-			if err != nil {
-				app.logger.Error("redis set error", "error", err)
-			}
+	if p.PasswordHash != nil {
+		data = templateData{}
+	} else {
+		data = templateData{
+			Paste: p,
 		}
 	}
 
-	data := templateData{
-		Paste:   p,
-		FullURL: fmt.Sprintf("%s/paste/%s", app.baseURL, p.Slug),
-	}
+	data.FullURL = fmt.Sprintf("%s/paste/%s", app.baseURL, p.Slug)
 
 	app.writeTemplate(w, "paste_view.tmpl", data)
 }
@@ -85,8 +61,22 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	var hashedPassword *string
+
+	password := r.PostForm.Get("password")
+	if strings.TrimSpace(password) != "" {
+		hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			app.writeServerError(w, err)
+			return
+		}
+
+		hashedString := string(hashedBytes)
+		hashedPassword = &hashedString
+	}
+
 	// write to database
-	paste, err := app.pasteModel.Insert(content, expires)
+	paste, err := app.pasteModel.Insert(content, expires, hashedPassword)
 	if err != nil {
 		app.writeServerError(w, err)
 		return
@@ -104,4 +94,53 @@ func (app *application) handlePasteCreate(w http.ResponseWriter, r *http.Request
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/paste/%s", paste.Slug), http.StatusSeeOther)
+}
+
+func (app *application) handlePasteUnlock(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+
+	err := r.ParseForm()
+	if err != nil {
+		app.writeClientError(w, http.StatusBadRequest)
+		return
+	}
+
+	p, err := app.getPaste(r.Context(), slug)
+	if err != nil {
+		if errors.Is(err, models.ErrNotFound) {
+			http.NotFound(w, r)
+			return
+		} else {
+			app.writeServerError(w, err)
+			return
+		}
+	}
+
+	if p.PasswordHash == nil {
+		data := templateData{
+			Paste:   p,
+			FullURL: fmt.Sprintf("%s/paste/%s", app.baseURL, p.Slug),
+		}
+		app.writeTemplate(w, "paste_view.tmpl", data)
+		return
+	}
+
+	enteredPassword := r.PostForm.Get("password")
+
+	err = bcrypt.CompareHashAndPassword([]byte(*p.PasswordHash), []byte(enteredPassword))
+	if err != nil {
+		data := templateData{
+			Error:   "incorrect password",
+			FullURL: fmt.Sprintf("%s/paste/%s", app.baseURL, p.Slug),
+		}
+		app.writeTemplate(w, "paste_view.tmpl", data)
+		return
+	}
+
+	data := templateData{
+		Paste:   p,
+		FullURL: fmt.Sprintf("%s/paste/%s", app.baseURL, p.Slug),
+	}
+
+	app.writeTemplate(w, "paste_view.tmpl", data)
 }

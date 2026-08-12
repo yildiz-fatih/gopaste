@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:18.3-alpine
+    image: postgres:18.4-alpine3.24
     ports:
       - "5432:5432"
     environment:
@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:alpine
+    image: redis:8.10.0-alpine3.23
     ports:
       - "6379:6379"
     command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   migrate:
-    image: migrate/migrate
+    image: migrate/migrate:v4.19.1
     volumes:
       - ./migrations:/migrations
     command:
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
 
   caddy:
-    image: caddy:alpine
+    image: caddy:2.11.4-alpine
     ports:
       - "80:80"
       - "443:443"

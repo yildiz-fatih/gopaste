@@ -36,7 +36,7 @@
 {{ else }}
 <div class="lock">
     <form action="{{ .FullURL }}" method="POST">
-        <img src="/static/icons/lock.svg" alt="Locked">
+        <span class="lock-emoji">🔒</span>
         {{ if .Error }}
             <p>{{ .Error }}</p>
         {{ end }}
@@ -48,7 +48,7 @@
 <style>
     .lock { height: 100%; display: flex; align-items: center; justify-content: center; }
     .lock form { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-    .lock img { width: 32px; height: 32px; filter: invert(1); }
+    .lock-emoji { font-size: 48px; }
     .lock input, .lock button { font-size: 16px; padding: 10px 14px; }
 </style>
 {{ end }}

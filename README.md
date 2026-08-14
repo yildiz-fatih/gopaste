@@ -6,14 +6,13 @@ GoPaste is a minimal, high-performance pastebin built with Go, PostgreSQL and Re
 
 **Live at [gopaste.surf](https://gopaste.surf)**
 
-![Paste view](assets/pasteview.jpg)
+![Paste view](assets/paste-view.png)
 
 ## Features
 
 - **Expiration**: keep a paste for an hour, a day, or a week
 - **Syntax highlighting**: with automatic language detection
 - **Keyboard shortcuts**: `Ctrl+S` to save, `Ctrl+N` for a new paste
-- **QR code**: generated client-side for every paste
 
 ## Quick Start
 

@@ -3,33 +3,25 @@
 
     <textarea name="content" placeholder="type (or paste) something..." autofocus></textarea>
 
-    <div id="top" class="controls">
-        <div class="icon-row">
-            <button type="submit" title="save (ctrl+s)">
-                <img src="/static/icons/save.svg" alt="Save">
-            </button>
+    <div class="dock">
+        <button type="submit" class="dock-btn dock-btn--primary"><span class="dock-key">^S</span> Save</button>
+        <button type="button" class="dock-btn" onclick="window.location.href='/'"><span class="dock-key">^N</span> New</button>
+        <button type="button" class="dock-btn" onclick="window.location.href='/paste/help'">Help</button>
 
-            <button type="button" title="new (ctrl+n)" onclick="window.location.href='/'">
-                <img src="/static/icons/plus.svg" alt="New">
-            </button>
+        <span class="dock-sep"></span>
 
-            <button type="button" title="help" onclick="window.location.href='/paste/help'">
-                <img src="/static/icons/message-circle-question-mark.svg" alt="Help">
-            </button>
-        </div>
-
-        <div class="expires">
-            <label for="expires">expires:</label>
-            <select name="expires" id="expires">
-                <option value="1">one hour</option>
-                <option value="24">one day</option>
-                <option value="168">one week</option>
+        <span class="dock-slot">
+            <label for="expires" class="dock-text">expires</label>
+            <select name="expires" id="expires" class="dock-select">
+                <option value="1">1h</option>
+                <option value="24">1d</option>
+                <option value="168">1w</option>
             </select>
-        </div>
+        </span>
 
-        <div>
-            <input type="password" name="password" id="password" placeholder="password (optional)">
-        </div>
+        <span class="dock-sep"></span>
+
+        <input type="password" name="password" id="password" placeholder="password (optional)" class="dock-input dock-slot-wide">
     </div>
 
 </form>

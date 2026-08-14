@@ -4,26 +4,18 @@
 
 <pre id="content"><code>{{ .Paste.Content }}</code></pre>
 
-<div id="top" class="controls">
-    <div class="icon-row">
-        <button type="button" title="copy" id="copy-content">
-            <img src="/static/icons/copy.svg" alt="Copy">
-        </button>
+<div class="dock">
+    <button type="button" class="dock-btn dock-btn--primary" id="copy-content">Copy</button>
+    <button type="button" class="dock-btn" onclick="window.location.href='/'"><span class="dock-key">^N</span> New</button>
+    <button type="button" class="dock-btn" onclick="window.location.href='/paste/help'">Help</button>
 
-        <button type="button" title="new (ctrl+n)" onclick="window.location.href='/'">
-            <img src="/static/icons/plus.svg" alt="New">
-        </button>
+    <span class="dock-sep"></span>
 
-        <button type="button" title="help" onclick="window.location.href='/paste/help'">
-            <img src="/static/icons/message-circle-question-mark.svg" alt="Help">
-        </button>
-    </div>
+    <span class="dock-text dock-slot">exp {{ .Paste.Expires.Format "2 Jan 2006" }}</span>
 
-    <div>expires: {{ .Paste.Expires.Format "2 Jan 2006" }}</div>
+    <span class="dock-sep"></span>
 
-    <div id="qrcode"></div>
-
-    <div class="paste-url">{{ .FullURL }}</div>
+    <span class="dock-text dock-url paste-url dock-slot-wide">{{ .FullURL }}</span>
 </div>
 
 <script>
@@ -31,12 +23,6 @@
         // highlight code
         const block = document.querySelector('#content code')
         hljs.highlightElement(block)
-        // generate qr code
-        var qrcode = new QRCode(document.getElementById("qrcode"), {
-            text: window.location.href,
-            width: 124,
-            height: 124
-        })
     })
 
     document.addEventListener('keydown', (e) => {
@@ -62,8 +48,7 @@
 <style>
     .lock { height: 100%; display: flex; align-items: center; justify-content: center; }
     .lock form { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-    .lock img { width: 32px; height: 32px; }
-    @media (prefers-color-scheme: dark) { .lock img { filter: invert(1); } }
+    .lock img { width: 32px; height: 32px; filter: invert(1); }
     .lock input, .lock button { font-size: 16px; padding: 10px 14px; }
 </style>
 {{ end }}

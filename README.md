@@ -1,4 +1,8 @@
-# gopaste
+<p align="center">
+    <img src="assets/logo.png" width="300" alt="GoPaste Logo">
+</p>
+
+<h1 align="center">GoPaste</h1>
 
 ![CI/CD Pipeline](https://github.com/yildiz-fatih/gopaste/actions/workflows/pipeline.yml/badge.svg)
 
@@ -46,3 +50,7 @@ make cover-html   # open coverage report in the browser
 ## Deployment
 
 Runs on a DigitalOcean droplet using Docker Compose. Caddy handles the reverse proxy and automatic HTTPS. Every push to `main` is tested, built and deployed using GitHub Actions.
+
+## Special Thanks
+
+A huge shoutout to my sister for designing and drawing the gopher logo!
